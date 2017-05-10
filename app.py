@@ -3,11 +3,10 @@
 Meetup API proxy.
 """
 
-import json
 import arrow
 import requests
 from box import Box
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import cross_origin
 
 
@@ -64,4 +63,4 @@ def meetup_js():
 @cross_origin()
 def test_json():
     """ Test CORS JSON """
-    return json.dumps(return_value())
+    return jsonify(return_value())
