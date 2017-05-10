@@ -26,7 +26,7 @@ def get_results(response, index=0):
     return {
         'topic': obj.name,
         'day': date.day,
-        'month': calendar.month_name[date - 1].upper(),
+        'month': calendar.month_name[date.month - 1].upper(),
         'link': obj.link,
     }
 
