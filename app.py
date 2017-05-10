@@ -3,13 +3,16 @@
 Meetup API proxy.
 """
 
+import json
 import arrow
 import requests
 from box import Box
 from flask import Flask
+from flask_cors import cross_origin
 
 
 app = Flask(__name__)
+
 MONTHS = ['', 'GENNAIO', 'FEBBRAIO', 'MARZO', 'APRILE', 'MAGGIO', 'GIUGNO', 'LUGLIO', 'AGOSTO', 'SETTEMBRE', 'OTTOBRE', 'NOVEMBRE', 'DICEMBRE']
 
 CURRENT_EVENTS = 'https://api.meetup.com/Python-Milano/events'
@@ -55,3 +58,10 @@ def meetup_js():
         $('#month').text('{month}');
         $('#meetup_link').attr('href', '{link}');
         """.format(**return_value())
+
+
+@app.route('/test.json')
+@cross_origin()
+def test_json():
+    """ Test CORS JSON """
+    return json.dumps(return_value())
