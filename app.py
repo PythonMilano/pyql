@@ -3,8 +3,6 @@
 Meetup API proxy.
 """
 
-import calendar
-import locale
 import arrow
 import requests
 from box import Box
@@ -12,7 +10,7 @@ from flask import Flask
 
 
 app = Flask(__name__)
-locale.setlocale(locale.LC_ALL, 'it_IT.UTF-8')
+MONTHS = ['', 'GENNAIO', 'FEBBRAIO', 'MARZO', 'APRILE', 'MAGGIO', 'GIUGNO', 'LUGLIO', 'AGOSTO', 'SETTEMBRE', 'OTTOBRE', 'NOVEMBRE', 'DICEMBRE']
 
 CURRENT_EVENTS = 'https://api.meetup.com/Python-Milano/events'
 PAST_EVENTS = 'https://api.meetup.com/milano-scala-group/events/?status=past'
@@ -26,7 +24,7 @@ def get_results(response, index=0):
     return {
         'topic': obj.name,
         'day': date.day,
-        'month': calendar.month_name[date.month].upper(),
+        'month': MONTHS[date.month],
         'link': obj.link,
     }
 
