@@ -16,6 +16,7 @@ MONTHS = ['', 'GENNAIO', 'FEBBRAIO', 'MARZO', 'APRILE', 'MAGGIO', 'GIUGNO',
           'LUGLIO', 'AGOSTO', 'SETTEMBRE', 'OTTOBRE', 'NOVEMBRE', 'DICEMBRE']
 
 CURRENT_EVENTS = 'https://api.meetup.com/{meetup}/events'
+
 PAST_EVENTS = 'https://api.meetup.com/{meetup}/events/?status=past'
 
 
