@@ -3,46 +3,47 @@
 Meetup API proxy.
 """
 
-import requests
+import os
 
 import arrow
+import requests
 from box import Box
 from flask import Flask, jsonify
 from flask_cors import cross_origin
 
 app = Flask(__name__)
 
+EVENTBRITE_API = 'https://www.eventbriteapi.com/v3/events/search/?token={token}&organizer.id={organizer_id}'
+
+EVENTBRITE_SETTINGS = {
+    'token': os.environ['EB_TOKEN'],
+    'organizer_id': os.environ['EB_ORGANIZER_ID'],
+}
+
 MONTHS = ['', 'GENNAIO', 'FEBBRAIO', 'MARZO', 'APRILE', 'MAGGIO', 'GIUGNO',
           'LUGLIO', 'AGOSTO', 'SETTEMBRE', 'OTTOBRE', 'NOVEMBRE', 'DICEMBRE']
 
-CURRENT_EVENTS = 'https://api.meetup.com/{meetup}/events'
-
-PAST_EVENTS = 'https://api.meetup.com/{meetup}/events/?status=past'
-
 
 def get_results(response, index=0):
-    """ Get results from meetup API"""
-    obj = Box(response.json()[index])
-    date = arrow.Arrow.fromtimestamp(obj.time / 1000)
+    """ Transform JSON to return dict """
+
+    obj = Box(response.json()).events[index]
+    date = arrow.get(obj.start.local)
 
     return {
-        'topic': obj.name,
+        'topic': obj.name.text,
         'day': date.day,
         'month': MONTHS[date.month],
-        'link': obj.link,
+        'link': obj.url,
     }
 
 
-def return_value(meetup='Python-Milano'):
-    """ meetup API call """
-    response = requests.get(CURRENT_EVENTS.format(meetup=meetup))
+def return_value():
+    """ API call """
+
+    response = requests.get(EVENTBRITE_API.format_map(EVENTBRITE_SETTINGS))
     if response.status_code == 200 and response.json():
         return get_results(response)
-
-    response = requests.get(PAST_EVENTS.format(meetup=meetup))
-    if response.status_code == 200 and response.json():
-        return get_results(response, -1)
-
     return {
         'topic': 'TBA',
         'day': 'NA',
@@ -53,7 +54,8 @@ def return_value(meetup='Python-Milano'):
 
 @app.route('/meetup.js')
 def meetup_js():
-    """ Convert JSON to JS """
+    """ API JSON to jQuery """
+
     return """ $('#topic').text('{topic}');
         $('#day').text('{day}');
         $('#month').text('{month}');
@@ -64,5 +66,12 @@ def meetup_js():
 @app.route('/<meetup>.json')
 @cross_origin()
 def test_json(meetup):
-    """ Test CORS JSON """
+    """ return JSON result with CORS """
+
     return jsonify(return_value(meetup))
+
+
+@app.route('/')
+def main():
+    """ aka hello world :-) """
+    return 'OMG! It works!'
