@@ -1,9 +1,9 @@
 arrow==0.10.0
+eventbrite==3.3.3
 flake8==3.4.1
 Flask==0.12.2
 Flask-Cors==3.0.3
 gunicorn==19.7.1
-pylint==1.7.2
-python-box==3.0.1
+pylint==1.7.4
+python-box==3.1.1
 python-dateutil==2.6.1
-requests==2.18.4

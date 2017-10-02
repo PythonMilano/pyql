@@ -6,50 +6,45 @@ Meetup API proxy.
 import os
 
 import arrow
-import requests
 from box import Box
 from flask import Flask, jsonify
 from flask_cors import cross_origin
+from eventbrite import Eventbrite
 
 app = Flask(__name__)
 
-EVENTBRITE_API = 'https://www.eventbriteapi.com/v3/events/search/?token={token}&organizer.id={organizer_id}'
-
-EVENTBRITE_SETTINGS = {
-    'token': os.environ['EB_TOKEN'],
-    'organizer_id': os.environ['EB_ORGANIZER_ID'],
-}
+eb_client = Eventbrite(os.environ['EB_TOKEN'])
 
 MONTHS = ['', 'GENNAIO', 'FEBBRAIO', 'MARZO', 'APRILE', 'MAGGIO', 'GIUGNO',
           'LUGLIO', 'AGOSTO', 'SETTEMBRE', 'OTTOBRE', 'NOVEMBRE', 'DICEMBRE']
 
 
-def get_results(response, index=0):
+def return_value():
     """ Transform JSON to return dict """
 
-    obj = Box(response.json()).events[index]
-    date = arrow.get(obj.start.local)
+    try:
+        events = Box(eb_client.event_search(**{'organizer.id': os.environ['EB_ORGANIZER_ID']}))
+    except:
+        return {
+            'topic': 'TBA',
+            'day': 'NA',
+            'month': 'NA',
+            'link': '#',
+        }
+    else:
+        obj = events.events[0]
+        if events.pagination.object_count > 1:
+            ev = {ev.start.local: idx for idx, ev in enumerate(events.events)}
+            obj = events.events[ev[min(ev.keys())]]
 
-    return {
-        'topic': obj.name.text,
-        'day': date.day,
-        'month': MONTHS[date.month],
-        'link': obj.url,
-    }
+        date = arrow.get(obj.start.local)
 
-
-def return_value():
-    """ API call """
-
-    response = requests.get(EVENTBRITE_API.format_map(EVENTBRITE_SETTINGS))
-    if response.status_code == 200 and response.json():
-        return get_results(response)
-    return {
-        'topic': 'TBA',
-        'day': 'NA',
-        'month': 'NA',
-        'link': '#',
-    }
+        return {
+            'topic': obj.name.text,
+            'day': date.day,
+            'month': MONTHS[date.month],
+            'link': obj.url,
+        }
 
 
 @app.route('/meetup.js')
